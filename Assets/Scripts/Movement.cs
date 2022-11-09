@@ -5,6 +5,10 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     [SerializeField] float moveSpeed;
+    [SerializeField] float jumpPower;
+
+    Rigidbody2D rigid;      // 리지드바디를 참조하는 변수.
+    int jumpCount;          // 점프 가능 횟수.
 
     // 유니티는 실행 시 모든 컴포넌트의 이벤트 함수들을 델리게이트로 등록한다.
     // 이후, 순서에 따라 해당 함수들을 호출한다.
@@ -14,6 +18,9 @@ public class Movement : MonoBehaviour
     // 게임 실행 시 최초에 1번만 불리는 초기화 함수.
     void Start()
     {
+        rigid = GetComponent<Rigidbody2D>();        // 나의 Rigidbody2D를 검색해서 참조한다.
+        jumpCount = 1;                              // 점프 횟수를 1로 초기화.
+
         // 게임 오브젝트에게서 Transform 컴포넌트를 검색해 참조한다.
         Transform transform = GetComponent<Transform>();
 
@@ -41,8 +48,37 @@ public class Movement : MonoBehaviour
     void Update()
     {
         float x = Input.GetAxisRaw("Horizontal");  // 좌측:-1, 안누르면:0, 우측:1
-        float y = Input.GetAxisRaw("Vertical");    // 하단:-1, 안누르면:0, 상단:1
-        transform.position += transform.right * moveSpeed * x * Time.deltaTime;
-        transform.position += transform.up * moveSpeed * y * Time.deltaTime;
+        //float y = Input.GetAxisRaw("Vertical");  // 하단:-1, 안누르면:0, 상단:1
+        rigid.velocity = new Vector2(x * moveSpeed, rigid.velocity.y);
+
+        #region 좌표 이동 방식
+
+        // 방향 벡터를 구할때는 항상 Normalize(=정규화)를 마지막에 수행해야한다.
+        // Vector3 direction = (transform.right * x) + (transform.up * y);
+        // direction.Normalized();
+
+        // 예를 들어 우측으로 움직인 후 상단으로 움직였을 때에는 피타고라스의 법칙에 따라서 더 멀리 이동하게 된다.
+        // 따라서 우측 상단이라는 방향 벡터를 구하고 그 곳으로 moveSpeed만큼 움직인다.
+
+        // Time.deltaTime : 이전 프레임부터 현재 프레임 까지의 시간 차이. (약 0.000032f)
+        // 해당 값을 곱하는 이유는 프레임 차이에 의한 속도 차이를 보장하기 위함이다.
+        // transform.position += direction * moveSpeed * Time.deltaTime;
+
+        #endregion
+
+        // GetKeyDown   : 해당 키를 누른 그 순간 1회.
+        // GetKeyUp     : 해당 키를 땐 그 순간 1회.
+        // GetKey       : 해당 키를 누르고 있을 때 계속.
+        if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+        {
+            // ForceMode2D.Force    : 지속적인 힘.
+            // ForceMode2D.Impulse  : 한번에 뿜어져 나오는 힘.
+
+            // 점프하기 직전에 현재 y축 속도를 0으로 변경한다.
+            rigid.velocity = new Vector2(rigid.velocity.x, 0f);
+            rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+
+            jumpCount -= 1;
+        }
     }
 }
