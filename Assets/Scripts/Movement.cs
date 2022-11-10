@@ -81,4 +81,34 @@ public class Movement : MonoBehaviour
             jumpCount -= 1;
         }
     }
+
+    // Collider : 충돌체, 물리 연산과 충돌 체크를 동시에 한다.
+    // Trigger  : 영역, 충돌 체크만 한다. (보통 이벤트 트리거의 역할을 한다.)
+
+
+    // 어떠한 충돌체와 충돌한 그 순간.
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        Debug.Log($"Enter : {collision.gameObject.name}");
+    }
+    // 어떠한 충돌체가 충돌하고 있는 동안 계속.
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        Debug.Log($"Stay : {collision.gameObject.name}");
+    }
+    // 어떠한 충돌체와 충돌하고 있었는데 해제되는 그 순간.
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        Debug.Log($"Exit : {collision.gameObject.name}");
+    }
+
+    // 어떠한 트리거와 충돌하는 그 순간.
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        Debug.Log($"Trigger Enter : {collision.name}");
+    }
+
+    // Collider  : 충돌체, 위치, 크기, 트리거여부 등이 포함되어 있는 자료형.
+    // Collision : 충돌, 콜라이더는 물론 충돌한 영역, 위치, 속도, 힘 등이 포함되어있는 자료형.
+
 }
