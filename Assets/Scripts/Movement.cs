@@ -6,9 +6,13 @@ public class Movement : MonoBehaviour
 {
     [SerializeField] float moveSpeed;
     [SerializeField] float jumpPower;
+    [SerializeField] float groundRadius;
+    [SerializeField] Vector3 groundOffset;
+    [SerializeField] LayerMask groundMask;
 
     Rigidbody2D rigid;      // 리지드바디를 참조하는 변수.
     int jumpCount;          // 점프 가능 횟수.
+    bool isGrounded;        // 땅에 있는가?
 
     // 유니티는 실행 시 모든 컴포넌트의 이벤트 함수들을 델리게이트로 등록한다.
     // 이후, 순서에 따라 해당 함수들을 호출한다.
@@ -47,6 +51,17 @@ public class Movement : MonoBehaviour
     // 매 프레임마다 불리는 함수.
     void Update()
     {
+        // 지면 체크.
+        // = 원형 충돌 영역을 만들어 그 곳에 충돌하는 충돌체가 있으면 땅에 있다.
+        Collider2D hit = Physics2D.OverlapCircle(transform.position + groundOffset, groundRadius, groundMask);
+        isGrounded = hit != null;
+
+        // 지면에 충돌했고, 아래로 떨어지고 있는 경우. (=착지 순간)
+        if (isGrounded && rigid.velocity.y < -0.1f)
+        {
+            jumpCount = 1;
+        }
+
         float x = Input.GetAxisRaw("Horizontal");  // 좌측:-1, 안누르면:0, 우측:1
         //float y = Input.GetAxisRaw("Vertical");  // 하단:-1, 안누르면:0, 상단:1
         rigid.velocity = new Vector2(x * moveSpeed, rigid.velocity.y);
@@ -110,5 +125,10 @@ public class Movement : MonoBehaviour
 
     // Collider  : 충돌체, 위치, 크기, 트리거여부 등이 포함되어 있는 자료형.
     // Collision : 충돌, 콜라이더는 물론 충돌한 영역, 위치, 속도, 힘 등이 포함되어있는 자료형.
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawWireSphere(transform.position + groundOffset, groundRadius);
+    }
 
 }
