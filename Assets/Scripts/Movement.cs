@@ -14,6 +14,10 @@ public class Movement : MonoBehaviour
     int jumpCount;          // 점프 가능 횟수.
     bool isGrounded;        // 땅에 있는가?
 
+    float inputX;           // x축 입력 값.
+
+    public bool IsGrounded => isGrounded;
+
     // 유니티는 실행 시 모든 컴포넌트의 이벤트 함수들을 델리게이트로 등록한다.
     // 이후, 순서에 따라 해당 함수들을 호출한다.
     // 모든 순서대로 호출이 끝난 상태를 one loop(=1FRAME)이라고 하며
@@ -49,7 +53,7 @@ public class Movement : MonoBehaviour
     }
 
     // 매 프레임마다 불리는 함수.
-    void Update()
+    void LateUpdate()
     {
         // 지면 체크.
         // = 원형 충돌 영역을 만들어 그 곳에 충돌하는 충돌체가 있으면 땅에 있다.
@@ -62,9 +66,10 @@ public class Movement : MonoBehaviour
             jumpCount = 1;
         }
 
-        float x = Input.GetAxisRaw("Horizontal");  // 좌측:-1, 안누르면:0, 우측:1
+        // float x = Input.GetAxisRaw("Horizontal");  // 좌측:-1, 안누르면:0, 우측:1
         //float y = Input.GetAxisRaw("Vertical");  // 하단:-1, 안누르면:0, 상단:1
-        rigid.velocity = new Vector2(x * moveSpeed, rigid.velocity.y);
+        rigid.velocity = new Vector2(inputX * moveSpeed, rigid.velocity.y);
+        inputX = 0;
 
         #region 좌표 이동 방식
 
@@ -80,11 +85,21 @@ public class Movement : MonoBehaviour
         // transform.position += direction * moveSpeed * Time.deltaTime;
 
         #endregion
+    }
 
+    // Collider : 충돌체, 물리 연산과 충돌 체크를 동시에 한다.
+    // Trigger  : 영역, 충돌 체크만 한다. (보통 이벤트 트리거의 역할을 한다.)
+
+    public void Move(float x)
+    {
+        inputX = x;
+    }
+    public bool Jump()
+    {
         // GetKeyDown   : 해당 키를 누른 그 순간 1회.
         // GetKeyUp     : 해당 키를 땐 그 순간 1회.
         // GetKey       : 해당 키를 누르고 있을 때 계속.
-        if (Input.GetKeyDown(KeyCode.Space) && jumpCount > 0)
+        if (jumpCount > 0)
         {
             // ForceMode2D.Force    : 지속적인 힘.
             // ForceMode2D.Impulse  : 한번에 뿜어져 나오는 힘.
@@ -94,13 +109,14 @@ public class Movement : MonoBehaviour
             rigid.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
 
             jumpCount -= 1;
+            return true;
         }
+
+        return false;
     }
 
-    // Collider : 충돌체, 물리 연산과 충돌 체크를 동시에 한다.
-    // Trigger  : 영역, 충돌 체크만 한다. (보통 이벤트 트리거의 역할을 한다.)
 
-
+    /*
     // 어떠한 충돌체와 충돌한 그 순간.
     private void OnCollisionEnter2D(Collision2D collision)
     {
@@ -122,6 +138,7 @@ public class Movement : MonoBehaviour
     {
         Debug.Log($"Trigger Enter : {collision.name}");
     }
+    */
 
     // Collider  : 충돌체, 위치, 크기, 트리거여부 등이 포함되어 있는 자료형.
     // Collision : 충돌, 콜라이더는 물론 충돌한 영역, 위치, 속도, 힘 등이 포함되어있는 자료형.
