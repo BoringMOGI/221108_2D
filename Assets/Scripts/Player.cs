@@ -6,6 +6,7 @@ public class Player : MonoBehaviour
 {
     Animator anim;
     Movement movement;
+    Attackable attackable;
     Rigidbody2D rigid;
     SpriteRenderer spriteRenderer;
 
@@ -15,8 +16,10 @@ public class Player : MonoBehaviour
     {
         anim = GetComponent<Animator>();
         movement = GetComponent<Movement>();
+        attackable = GetComponent<Attackable>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         rigid = GetComponent<Rigidbody2D>();
+
     }
     private void Update()
     {
@@ -30,6 +33,7 @@ public class Player : MonoBehaviour
                 inputX = Movement();
             
             Jump();
+            Attack();
         } 
 
         anim.SetFloat("velocityY", rigid.velocity.y);   // float 파라미터 velocityY를 갱신.
@@ -37,15 +41,24 @@ public class Player : MonoBehaviour
         anim.SetBool("isRun", inputX != 0);             // bool 파라미터 isRun의 값을 갱신.
         anim.SetBool("isCrouch", isCrouch);
     }
+   
     private float Movement()
     {
         float x = Input.GetAxisRaw("Horizontal");
         movement.Move(x);
 
+        // 왼쪽으로 볼 때 (플레이어 입장에서는 반대로 보는 것이다.)
         if (x <= -1)
+        {
             spriteRenderer.flipX = true;
+            attackable.Reverse(true);
+        }
+        // 오른족으로 볼 때 (플레이어 입장에서는 정 방향으로 보는 것이다.)
         else if (x >= 1)
+        {
             spriteRenderer.flipX = false;
+            attackable.Reverse(false);
+        }
 
         return x;
     }
@@ -61,6 +74,12 @@ public class Player : MonoBehaviour
     private bool Crouch()
     {
         return Input.GetKey(KeyCode.DownArrow);
+    }
+    private void Attack()
+    {
+        // 특정 키를 누르면 공격 요청을 한다. (땅에 서 있어햐 한다.)
+        if (Input.GetKeyDown(KeyCode.LeftControl) && movement.IsGrounded)
+            attackable.Attack();
     }
 
 }
