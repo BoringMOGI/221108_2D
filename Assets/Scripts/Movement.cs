@@ -67,17 +67,18 @@ public class Movement : MonoBehaviour
             jumpCount = 1;
         }
 
+        // 제어자가 어딘가로 움직여라고 했다면..
         if (isMove)
         {
             rigid.velocity = new Vector2(inputX * moveSpeed, rigid.velocity.y);
             isMove = false;
         }
+        // 제어자가 더이상 제어하지 않는다면..
         else if(!isMove && inputX != 0)
         {
             rigid.velocity = new Vector2(0f, rigid.velocity.y);
             inputX = 0;
         }
-        
 
         #region 좌표 이동 방식
 

@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] float godModeTime;     // 무적 시간.
+    [SerializeField] float godModeTime;         // 무적 시간.
+    [SerializeField] GameObject gameoverText;   // 게임 오버 텍스트.
 
     Animator anim;
     Movement movement;
@@ -94,6 +95,7 @@ public class Player : MonoBehaviour
     public void OnDead()
     {
         isLockControl = true;                               // 컨트롤러 막기.
+        movement.enabled = false;                           // 이동 컴포넌트 끄기.
         rigid.bodyType = RigidbodyType2D.Static;            // Rigidbody를 정적으로 만들기. (멈춘다)
         gameObject.layer = LayerMask.NameToLayer("God");    // 죽었기 때문에 더이상 처리하지 않는다.
         anim.SetTrigger("onDead");                          // 데드 애니메이션 호출.
@@ -103,6 +105,7 @@ public class Player : MonoBehaviour
         spriteRenderer.enabled = false;
 
         // 무언가 처리...
+        gameoverText.SetActive(true);
     }
 
     IEnumerator IEGodMode()
@@ -139,6 +142,7 @@ public class Player : MonoBehaviour
         {
             if (movement.IsGrounded && rigid.velocity.y <= -0.1f)
                 break;
+
             yield return null;
         }
 
