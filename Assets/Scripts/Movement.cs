@@ -12,8 +12,9 @@ public class Movement : MonoBehaviour
 
     Rigidbody2D rigid;      // 리지드바디를 참조하는 변수.
     int jumpCount;          // 점프 가능 횟수.
-    bool isGrounded;        // 땅에 있는가?
 
+    bool isGrounded;        // 땅에 있는가?
+    bool isMove;            // 제어 대상이 움직여라고 했는가?
     float inputX;           // x축 입력 값.
 
     public bool IsGrounded => isGrounded;
@@ -66,10 +67,17 @@ public class Movement : MonoBehaviour
             jumpCount = 1;
         }
 
-        // float x = Input.GetAxisRaw("Horizontal");  // 좌측:-1, 안누르면:0, 우측:1
-        //float y = Input.GetAxisRaw("Vertical");  // 하단:-1, 안누르면:0, 상단:1
-        rigid.velocity = new Vector2(inputX * moveSpeed, rigid.velocity.y);
-        inputX = 0;
+        if (isMove)
+        {
+            rigid.velocity = new Vector2(inputX * moveSpeed, rigid.velocity.y);
+            isMove = false;
+        }
+        else if(!isMove && inputX != 0)
+        {
+            rigid.velocity = new Vector2(0f, rigid.velocity.y);
+            inputX = 0;
+        }
+        
 
         #region 좌표 이동 방식
 
@@ -93,6 +101,7 @@ public class Movement : MonoBehaviour
     public void Move(float x)
     {
         inputX = x;
+        isMove = true;
     }
     public bool Jump()
     {
@@ -114,7 +123,15 @@ public class Movement : MonoBehaviour
 
         return false;
     }
+    public void Throw(bool isLeft)
+    {
+        inputX = 0;
+        rigid.velocity = Vector2.zero;  // 던지기 전 기존에 있던 힘은 제거한다.
 
+        // 좌측 상단, 우측 상단으로 방향을 계산한다.
+        Vector2 direction = Vector2.up + (isLeft ? Vector2.left : Vector2.right);
+        rigid.AddForce(direction * 5f, ForceMode2D.Impulse);
+    }
 
     /*
     // 어떠한 충돌체와 충돌한 그 순간.
