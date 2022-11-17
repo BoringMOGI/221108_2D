@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, ITriggerEvent
 {
     [SerializeField] float godModeTime;         // 무적 시간.
     [SerializeField] GameObject gameoverText;   // 게임 오버 텍스트.
@@ -45,6 +45,7 @@ public class Player : MonoBehaviour
         anim.SetBool("isCrouch", isCrouch);
     }
    
+
     private float Movement()
     {
         float x = Input.GetAxisRaw("Horizontal");
@@ -85,6 +86,10 @@ public class Player : MonoBehaviour
             attackable.Attack();
     }
 
+    public void OnLockControl()
+    {
+        isLockControl = true;
+    }
     public void OnHit()
     {
         anim.SetTrigger("onHit");
@@ -103,9 +108,13 @@ public class Player : MonoBehaviour
     public void OnEndDead()
     {
         spriteRenderer.enabled = false;
-
-        // 무언가 처리...
-        gameoverText.SetActive(true);
+        GameManager.Instance.OnGameOver();
+    }
+    public void OnGoal()
+    {
+        // 플레이어의 승리 포즈
+        // 여러가지 플레이어의 연출..
+        GameManager.Instance.OnGameClear();
     }
 
     IEnumerator IEGodMode()
@@ -149,4 +158,17 @@ public class Player : MonoBehaviour
         isLockControl = false;
     }
 
+    public void OnEvent(string name)
+    {
+        switch(name)
+        {
+            // 골에 도착했다는 이벤트가 발생했을 때.
+            case "Goal":
+                GameManager.Instance.OnGameClear();
+                movement.enabled = false;
+                isLockControl = true;
+                gameObject.layer = LayerMask.NameToLayer("God");
+                break;
+        }
+    }
 }
