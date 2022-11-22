@@ -4,11 +4,18 @@ using UnityEngine;
 
 public class FallMove : MonoBehaviour
 {
+    public static FallMove Instance { get; private set; }
+
     [SerializeField] float moveSpeed;
     [SerializeField] float jumpPower;
 
     Rigidbody2D rigid;    // 참조 변수 rigid.
     bool isLock;          // 입력을 막는다.
+
+    private void Awake()
+    {
+        Instance = this;
+    }
 
     // Start is called before the first frame update
     void Start()

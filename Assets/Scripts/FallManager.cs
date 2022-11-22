@@ -13,6 +13,9 @@ public class FallManager : MonoBehaviour
     [SerializeField] FallObject fallPrefab;     // 생성할 프리팹.
     [SerializeField] float createRate;          // 생성 시간(간격)
 
+    [SerializeField] PatternScanLaser laser;    // 임시.
+    [SerializeField] float patternRate;         // 패턴 시간.
+
     [Header("UI")]
     [SerializeField] Text scoreText;            // 점수 텍스트 UI.
 
@@ -22,6 +25,7 @@ public class FallManager : MonoBehaviour
     LineRenderer lineRenderer;
     bool isGameOver;            // 게임이 끝났는가?
     float nextCreateTime;       // 다음 생성 시간.
+    float nextPatternTime;      // 다음 패턴 생성 시간.
     int score;                  // 점수.
 
     private void Start()
@@ -52,6 +56,8 @@ public class FallManager : MonoBehaviour
 
         lineRenderer = GetComponent<LineRenderer>();
 
+        nextCreateTime = createRate;
+        nextPatternTime = patternRate;
         score = 0;
         scoreText.text = $"SCORE : {score}";
     }
@@ -61,6 +67,7 @@ public class FallManager : MonoBehaviour
         if (!isGameOver)
         {
             CreateFall();
+            CreatePattern();
             DrawCreateLine();
         }
     }
@@ -83,6 +90,14 @@ public class FallManager : MonoBehaviour
             newObject.onAddScore += OnAddScore;
         }
     }
+    private void CreatePattern()
+    {
+        if(Time.time >= nextPatternTime)
+        {
+            nextPatternTime = Time.time + patternRate;
+            laser.Fire();
+        }
+    }
     private void DrawCreateLine()
     {
         lineRenderer.positionCount = 2;
@@ -90,7 +105,7 @@ public class FallManager : MonoBehaviour
         lineRenderer.SetPosition(1, createMax.position);
     }
 
-    private void OnContactPlayer()
+    public void OnContactPlayer()
     {
         // 이미 게임 오버가 되었기 때문에 중복 호출을 피한다.
         if (isGameOver)
